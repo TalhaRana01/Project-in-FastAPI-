@@ -19,3 +19,12 @@ async def get_user_api_key(session: AsyncSession, user : User):
   if not key_obj:
     raise HTTPException(status_code=404, detail="API not found")
   return key_obj.key
+
+async def get_or_create_user_credits(session: AsyncSession, user_id: int):
+  credit_obj = await session.scalar(select(UserCredits).where(UserCredits.user_id == user_id))
+  if not credit_obj:
+    credit_obj = UserCredits(user_id = user_id, credits =10 )
+    session.add(credit_obj)
+    await session.commit()
+    await session.refresh(credit_obj)
+  return credit_obj
